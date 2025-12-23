@@ -70,5 +70,4 @@ public class UserController {
         return service.update(id, user);
     }
 
-
 }
