@@ -72,4 +72,19 @@ public class UserService {
         return users;
     }
     //保存されているユーザーを 全部返す
+ 
+    // 追加③：ユーザー更新（名前更新）
+ // 追加③：ユーザー更新（名前更新）
+    public User update(Long id, User newUser) {
+        for (User user : users) {
+            if (user.getId().equals(id)) {
+                user.setName(newUser.getName());
+                return user;
+            }
+        }
+        return null; // 見つからない場合
+    }
+
+
+
 }

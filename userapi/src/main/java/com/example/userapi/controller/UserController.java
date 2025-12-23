@@ -64,10 +64,17 @@ public class UserController {
     //@RequestBody User user：送られてきた JSON を自動で User オブジェクトに変換
     //return service.create(user);ユーザー登録は Service に任せる。登録後の User を返す（JSONになる）
     
- // 追加：PUT /api/users/{id}（名前更新）
+    // 追加：PUT /api/users/{id}（名前更新）
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return service.update(id, user);
+        User updated = service.update(id, user);
+
+        if (updated == null) {
+            throw new RuntimeException("User not found: id=" + id);
+        }
+
+        return updated;
     }
+
 
 }
