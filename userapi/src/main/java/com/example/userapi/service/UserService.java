@@ -74,7 +74,7 @@ public class UserService {
     //保存されているユーザーを 全部返す
  
     // 追加③：ユーザー更新（名前更新）
- // 追加③：ユーザー更新（名前更新）
+    // 追加③：ユーザー更新（名前更新）
     public User update(Long id, User newUser) {
         for (User user : users) {
             if (user.getId().equals(id)) {
@@ -83,6 +83,16 @@ public class UserService {
             }
         }
         return null; // 見つからない場合
+    }
+ // 追加④：ユーザー削除（ID指定）
+    public boolean delete(Long id) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getId().equals(id)) {
+                users.remove(i);
+                return true; // 削除成功
+            }
+        }
+        return false; // 見つからない
     }
 
 
