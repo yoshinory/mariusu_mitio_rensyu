@@ -1,3 +1,5 @@
+//HTTPリクエスト（URL＋GET/POST/PUT）を受け取って、Service にお願いして、結果を JSON で返す窓口
+
 package com.example.userapi.controller;
 //このクラスは controller層 に属しますという宣言
 
@@ -22,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.userapi.model.User;
 import com.example.userapi.service.UserService;
 
-
 @RestController
-//@Controller+@ResponseBodyの省略
-//@Controller	：「このクラスは REST API用のコントローラ です」とSpringに伝える
-//@ResponseBody	： 戻り値（User）を 自動でJSONに変換 してくれる
+	//@Controller+@ResponseBodyの省略
+	//@Controller	：「このクラスは REST API用のコントローラ です」とSpringに伝える
+	//@ResponseBody	： 戻り値（User）を 自動でJSONに変換 してくれる
 @RequestMapping("/api/users")
-//「このControllerが担当するURLはすべて /api/users から始まるとSpringが解釈する」
+	//「このControllerが担当するURLはすべて /api/users から始まるとSpringが解釈する」
+
 public class UserController {
 
     private final UserService service;
@@ -36,7 +38,7 @@ public class UserController {
     public UserController(UserService service) {
         this.service = service;
     }
-    //「UserController は UserService を自分で作らず、Springに用意してもらう」
+    //「UserController は UserService を自分でnewで作らず、Springに用意してもらう」
     
     // ★追加①：GET /api/users（一覧取得）
     @GetMapping
@@ -55,7 +57,6 @@ public class UserController {
         //メソッド引数に渡す
     }
     
-    // 追加③：POST /api/users（ユーザー登録）
     @PostMapping
     public User createUser(@RequestBody User user) {
         return service.create(user);
@@ -72,9 +73,7 @@ public class UserController {
         if (updated == null) {
             throw new RuntimeException("User not found: id=" + id);
         }
-
+        //そのIDのユーザーがいなかったらエラーにする
         return updated;
     }
-
-
 }
