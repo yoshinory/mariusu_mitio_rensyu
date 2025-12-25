@@ -57,8 +57,15 @@ public class UserService {
         return repository.save(user);
     }
 
-    // ④ ユーザー更新（名前更新）
-    // PUT /api/users/{id}
+    
+    // 既存：一覧取得
+    public List<User> findAll() {
+        return users;
+    }
+    //保存されているユーザーを 全部返す
+ 
+    // 追加③：ユーザー更新（名前更新）
+    // 追加③：ユーザー更新（名前更新）
     public User update(Long id, User newUser) {
         // まず既存ユーザーを DB から取得
         User existing = repository.findById(id).orElse(null);
@@ -67,6 +74,18 @@ public class UserService {
         if (existing == null) {
             return null;
         }
+        return null; // 見つからない場合
+    }
+ // 追加④：ユーザー削除（ID指定）
+    public boolean delete(Long id) {
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getId().equals(id)) {
+                users.remove(i);
+                return true; // 削除成功
+            }
+        }
+        return false; // 見つからない
+    }
 
         // 更新したい項目だけを書き換える
         existing.setName(newUser.getName());
