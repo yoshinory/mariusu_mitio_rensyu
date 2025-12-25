@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.userapi.model.User;
 import com.example.userapi.service.UserService;
-//DELETE用のimport
 
 @RestController
 //@Controller+@ResponseBodyの省略
@@ -73,18 +72,16 @@ public class UserController {
         if (updated == null) {
             throw new RuntimeException("User not found: id=" + id);
         }
-
+    
         return updated;
     }
- // 追加：DELETE /api/users/{id}（ユーザー削除）
+    
+    // 追加：DELETE /api/users/{id}（ユーザー削除）
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-        boolean deleted = service.delete(id);
-
-        if (!deleted) {
-            throw new RuntimeException("User not found: id=" + id);
-        }
+         boolean deleted = service.delete(id);
+         if (!deleted) {
+         throw new RuntimeException("User not found: id=" + id);
+            }
     }
-
-
 }
