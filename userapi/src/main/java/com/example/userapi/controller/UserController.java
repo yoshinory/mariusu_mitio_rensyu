@@ -3,6 +3,7 @@ package com.example.userapi.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 //POST用
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.userapi.model.User;
 import com.example.userapi.service.UserService;
-
 
 @RestController
 //@Controller+@ResponseBodyの省略
@@ -72,9 +72,16 @@ public class UserController {
         if (updated == null) {
             throw new RuntimeException("User not found: id=" + id);
         }
-
+    
         return updated;
     }
-
-
+    
+    // 追加：DELETE /api/users/{id}（ユーザー削除）
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+         boolean deleted = service.delete(id);
+         if (!deleted) {
+         throw new RuntimeException("User not found: id=" + id);
+            }
+    }
 }

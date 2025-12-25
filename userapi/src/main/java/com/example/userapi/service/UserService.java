@@ -1,90 +1,90 @@
-//UserService は「ユーザー情報を管理する担当者」
-//Controller（受付）が「この人探して」「全員出して」とお願いすると、実際に探してくれる人
+// UserService は「ユーザー情報を管理する担当者」
+// Controller（受付）が「この人探して」「全員出して」とお願いすると、
+// 実際に DB から探してくれる人
 
 package com.example.userapi.service;
-//「このクラスは service という役割ですよ」という住所
-//Controller / Model と役割を分けるため
+// 「このクラスは service という役割ですよ」という住所
+// Controller / Model / Repository と役割を分けるため
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.example.userapi.model.User;
-//import は「このクラスで使う道具リスト」
-//| import      | 意味                  	|
-//| ----------- | ------------------- 		|
-//| `ArrayList` | 複数Userを入れる箱        |
-//| `List`      | 箱のルール                |
-//| `Service`   | SpringにServiceだと伝える |
-//| `User`      | ユーザー情報の型          |
-
+import com.example.userapi.repository.UserRepository;
+// import は「このクラスで使う道具リスト」
+// | import           | 意味                                     |
+// | ---------------- | -----------------------------------------|
+// | `List`           | 複数Userをまとめて扱うため               |
+// | `Service`        | SpringにServiceだと伝える                |
+// | `User`           | ユーザー情報の型（Entity）               |
+// | `UserRepository` | DB操作を担当するRepository               |
 
 @Service
 public class UserService {
-//@Service がやっていること
-//Spring が全クラスをスキャン -> @Service を見つける -> UserService のインスタンスを1つ作る -> Springの箱（コンテナ）に保存
-//これにより -> {Controller から呼び出せる 、 new しなくてよい 、 使い回される（シングルトン）}
 
-    private List<User> users = new ArrayList<>();
-    //これは何か？ ：今だけ使う簡易データベース　（データベースの代役）、メモリ上にある「ユーザー名簿」
-    //Listの理由　 ：ユーザーは複数いる為、順番に並べて持てる為
-    //privateの理由：勝手に外から書き換えられないようにする為、操作は必ずメソッド経由の為
+    // Repository は「DBと会話する担当者」
+    // Service は直接DBを触らず、必ず Repository 経由で操作する
+    private final UserRepository repository;
 
-    public UserService() {
-        // 仮データ（今はDBが無いのでメモリに置く）
-        users.add(new User(1L, "Taro"));
-        users.add(new User(2L, "Hanako"));
-    }
-    //呼ばれるタイミング：Springが UserServiceを作った瞬間
-    //中身の解説		：最初から2人分のユーザーを登録
-
-    // 追加①：IDでユーザーを探す
-    public User findById(Long id) {
-    //「IDがこれのユーザーを返す」、見つからなければ「いない」と伝える
-        for (User user : users) {
-        //users の中身を先頭から1人ずつ確認
-            if (user.getId().equals(id)) {
-                return user;
-                //見つかったら、Controller に結果を返して処理終了
-            }
-        }
-        return null; // 見つからなかった場合、「該当ユーザーなし」の合図
+    // 呼ばれるタイミング：
+    // Spring が UserService を作るときに、UserRepository を渡してくれる
+    //（DI：依存性注入）
+    public UserService(UserRepository repository) {
+        this.repository = repository;
     }
 
-    // 追加②：ユーザー登録
-    public User create(User user) {
-        // 仮のIDを作る（今は「人数＋1」）
-        Long newId = (long) (users.size() + 1);
-        //今いる人数を数える、次の番号をIDにする
-        user.setId(newId);
-        //ユーザーにIDをセット
-        users.add(user);
-        // ユーザーを名簿に追加
-
-        return user;
-        //登録したユーザーを返す
-    }
-
-    
-    // 既存：一覧取得
+    // ① 一覧取得
+    // GET /api/users
     public List<User> findAll() {
-        return users;
+        // DBに保存されているユーザーをすべて取得
+        return repository.findAll();
     }
-    //保存されているユーザーを 全部返す
- 
-    // 追加③：ユーザー更新（名前更新）
- // 追加③：ユーザー更新（名前更新）
+
+    // ② IDでユーザーを探す
+    // GET /api/users/{id}
+    public User findById(Long id) {
+        // repository.findById は Optional を返すため、
+        // 見つからなかった場合は null を返すようにしている
+        return repository.findById(id).orElse(null);
+    }
+
+    // ③ ユーザー登録
+    // POST /api/users
+    public User create(User user) {
+        // IDは DB 側で自動採番されるため、ここでは設定しない
+        // save() は「新規登録」と「更新」の両方を担当する
+        return repository.save(user);
+    }
+
+    // ④ ユーザー更新（名前更新）
+    // PUT /api/users/{id}
     public User update(Long id, User newUser) {
-        for (User user : users) {
-            if (user.getId().equals(id)) {
-                user.setName(newUser.getName());
-                return user;
-            }
+        // まず既存ユーザーを DB から取得
+        User existing = repository.findById(id).orElse(null);
+
+        // 見つからない場合は null を返す
+        if (existing == null) {
+            return null;
         }
-        return null; // 見つからない場合
+
+        // 更新したい項目だけを書き換える
+        existing.setName(newUser.getName());
+
+        // 再度 save() することで DB に更新内容を反映
+        return repository.save(existing);
     }
 
+    // ⑤ ユーザー削除
+    // DELETE /api/users/{id}
+    public boolean delete(Long id) {
+        // 先に存在チェックを行う
+        if (!repository.existsById(id)) {
+            return false;
+        }
 
-
+        // DB から削除
+        repository.deleteById(id);
+        return true;
+    }
 }

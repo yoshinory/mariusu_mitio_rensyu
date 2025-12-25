@@ -1,27 +1,61 @@
 //User.java は「ユーザー情報を書くための紙のフォーマット」
 
 package com.example.userapi.model;
+//Javaの「住所（フォルダ）」を表す
+//Spring Bootは @SpringBootApplication のあるパッケージ配下を探す → model がそこにあるのが大事
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+//@Entity や @Id などは JPAのアノテーション、それを使うためにimportする
 
+@Entity
+//このテーブルはDBのテーブルになるという目印
+@Table(name = "users")
+//DB上のテーブル名を users にする
 public class User {
+
+    @Id
+    //主キー
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //新規登録（INSERT）の時に、IDを 自動採番してくれる設定
     private Long id;
-    //id	：ユーザー番号
+
+    @Column(nullable = false)
     private String name;
-    //name	：ユーザー名
-    //privateの理由：外から勝手に書き換えられないようにするため、必ず決まった方法（getter/setter）経由で管理する為
+    //name は空にしない（必須）という意味
 
-    public User() {
-        // JSONを受け取る時に必要（Spring専用の入口）
+    // JPAが内部で使うために必須
+    protected User() {
     }
+    //JPAがDBからデータを読むときの内部処理：まず new User() をする（空で作る）→　そこに id や name をセットする
+    //その為に 引数なしコンストラクタが必要。
 
-    public User(Long id, String name) {
-        this.id = id;
+    // アプリ側で使うコンストラクタ
+    public User(String name) {
         this.name = name;
-        // 仮のユーザーデータを作るとき、テスト用データを作るときに必要（これは人間用）
+    }
+    //新規登録の時、普通は「名前だけ送る」ので、JSON：{"name":"Taro"} → DBがIDを付ける		という流れにしたい。
+
+    // getter / setter
+    public Long getId() {
+        return id;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) { // 今回は残してOK
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    //JSONをUserに変換するとき（@RequestBody）
+    //DBのデータをUserに入れるとき（JPA）
+    //JSONで返すとき（@RestController）
 }
