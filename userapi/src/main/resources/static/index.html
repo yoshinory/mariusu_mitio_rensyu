@@ -1,150 +1,494 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>User管理</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 14px;
+
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --neutral: #374151;
+
+      --ok-bg: #ecfdf5;
+      --ok-text: #065f46;
+      --ok-border: #a7f3d0;
+
+      --ng-bg: #fef2f2;
+      --ng-text: #991b1b;
+      --ng-border: #fecaca;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 16px 56px;
+    }
+
+    header {
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 220px;
+    }
+    label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      font-size: 14px;
+      background: #fff;
+    }
+    input[type="text"]:focus {
+      border-color: rgba(37, 99, 235, .6);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--neutral);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn:hover { filter: brightness(.98); }
+    .btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .btn-danger {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+    }
+
+    .msg {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: none;
+      font-size: 13px;
+    }
+    .msg.ok {
+      display: block;
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok-text);
+    }
+    .msg.ng {
+      display: block;
+      background: var(--ng-bg);
+      border-color: var(--ng-border);
+      color: var(--ng-text);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .count {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    thead th {
+      text-align: left;
+      font-size: 12px;
+      color: var(--muted);
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+    }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      font-size: 14px;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .td-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .inline-edit {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .inline-edit input[type="text"] {
+      width: 240px;
+      max-width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 860px) {
+      .grid {
+        grid-template-columns: 380px 1fr;
+        align-items: start;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <header>
+      <h1>ユーザー管理</h1>
+    </header>
 
-  <h1>ユーザー管理</h1>
+    <div class="grid">
+      <!-- 左：登録カード -->
+      <section class="card">
+        <h2>ユーザー登録</h2>
+        <form id="userForm">
+          <div class="row">
+            <div class="field">
+              <label for="nameInput">名前</label>
+              <input type="text" id="nameInput" placeholder="例：Taro" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary" id="createBtn" type="submit" disabled>登録</button>
+          </div>
+        </form>
 
-  <!-- 登録フォーム -->
-  <h2>ユーザー登録</h2>
-  <form id="userForm">
-    <label>
-      名前：
-      <input type="text" id="nameInput" placeholder="例：Taro" required>
-    </label>
-    <button type="submit">登録</button>
-  </form>
+        <div id="message" class="msg"></div>
 
-  <p id="message"></p>
+        <p class="muted">
+          ※ 名前が空の場合は登録できません。<br />
+        </p>
+      </section>
 
-  <!-- 一覧表示 -->
-  <h2>ユーザー一覧</h2>
-  <ul id="userList"></ul>
+      <!-- 右：一覧カード -->
+      <section class="card">
+        <div class="toolbar">
+          <div>
+            <h2 style="margin:0 0 6px;">ユーザー一覧</h2>
+            <div class="count" id="countText">0 件</div>
+          </div>
+
+          <div class="field" style="min-width:260px; margin:0;">
+            <label for="searchInput">検索（名前フィルタ）</label>
+            <input type="text" id="searchInput" placeholder="例：ta / hanako ..." autocomplete="off" />
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 90px;">ID</th>
+              <th>名前</th>
+              <th style="width: 280px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
 
   <script>
     const form = document.getElementById("userForm");
     const nameInput = document.getElementById("nameInput");
+    const createBtn = document.getElementById("createBtn");
     const message = document.getElementById("message");
-    const userList = document.getElementById("userList");
+
+    const searchInput = document.getElementById("searchInput");
+    const countText = document.getElementById("countText");
+    const userTableBody = document.getElementById("userTableBody");
+
+    // 画面状態（検索フィルタ用に保持）
+    let allUsers = [];
+
+    // メッセージ表示（成功/失敗）
+    function showMessage(text, type) {
+      // type: "ok" | "ng"
+      message.textContent = text;
+      message.className = "msg " + (type === "ok" ? "ok" : "ng");
+      // 3秒後に消す（邪魔になりにくい）
+      window.clearTimeout(showMessage._timer);
+      showMessage._timer = window.setTimeout(() => {
+        message.className = "msg";
+        message.textContent = "";
+      }, 3000);
+    }
+
+    function setCreateButtonState() {
+      const name = nameInput.value.trim();
+      createBtn.disabled = name.length === 0;
+    }
+
+    nameInput.addEventListener("input", setCreateButtonState);
 
     // 一覧取得（GET /api/users）
     async function loadUsers() {
-      userList.innerHTML = "";
-
       const response = await fetch("/api/users");
       if (!response.ok) {
-        message.textContent = `一覧取得に失敗しました（HTTP ${response.status}）`;
+        showMessage(`一覧取得に失敗しました（HTTP ${response.status}）`, "ng");
         return;
       }
+      allUsers = await response.json();
+      renderUsers();
+    }
 
-      const users = await response.json();
+    // 検索フィルタ + 描画
+    function renderUsers() {
+      const keyword = searchInput.value.trim().toLowerCase();
 
-      users.forEach(user => {
-        const li = document.createElement("li");
+      const filtered = allUsers.filter(u => {
+        if (!keyword) return true;
+        return String(u.name || "").toLowerCase().includes(keyword);
+      });
 
-        // 表示モード用（通常表示）
+      countText.textContent = `${filtered.length} 件`;
+      userTableBody.innerHTML = "";
+
+      filtered.forEach(user => {
+        const tr = document.createElement("tr");
+
+        // ID
+        const tdId = document.createElement("td");
+        tdId.textContent = user.id;
+
+        // 名前（表示モード + 編集モード）
+        const tdName = document.createElement("td");
+
         const nameSpan = document.createElement("span");
-        nameSpan.textContent = `${user.id} : ${user.name} `;
+        nameSpan.textContent = user.name;
 
-        // 編集モード用（最初は非表示）
+        const editWrap = document.createElement("div");
+        editWrap.className = "inline-edit";
+        editWrap.style.display = "none";
+
         const editInput = document.createElement("input");
         editInput.type = "text";
         editInput.value = user.name;
-        editInput.style.display = "none";
+        editInput.placeholder = "名前を入力";
 
-        // 変更ボタン（通常表示）
+        tdName.appendChild(nameSpan);
+        editWrap.appendChild(editInput);
+        tdName.appendChild(editWrap);
+
+        // 操作列
+        const tdActions = document.createElement("td");
+        tdActions.className = "td-actions";
+
         const editBtn = document.createElement("button");
         editBtn.type = "button";
+        editBtn.className = "btn";
         editBtn.textContent = "変更";
 
-        // 保存ボタン（最初は非表示）
         const saveBtn = document.createElement("button");
         saveBtn.type = "button";
+        saveBtn.className = "btn btn-primary";
         saveBtn.textContent = "保存";
         saveBtn.style.display = "none";
 
-        // キャンセルボタン（最初は非表示）
         const cancelBtn = document.createElement("button");
         cancelBtn.type = "button";
+        cancelBtn.className = "btn";
         cancelBtn.textContent = "キャンセル";
         cancelBtn.style.display = "none";
 
-        // 削除ボタン（通常表示）
         const deleteBtn = document.createElement("button");
         deleteBtn.type = "button";
+        deleteBtn.className = "btn btn-danger";
         deleteBtn.textContent = "削除";
 
-        // 編集モードへ切り替え
+        // 入力の最小バリデーション（編集時）
+        function isValidName(v) {
+          return v.trim().length > 0;
+        }
+
+        // 編集モードへ
         editBtn.onclick = () => {
           nameSpan.style.display = "none";
-          editBtn.style.display = "none";
+          editWrap.style.display = "flex";
 
-          editInput.style.display = "inline";
-          saveBtn.style.display = "inline";
-          cancelBtn.style.display = "inline";
+          editBtn.style.display = "none";
+          deleteBtn.style.display = "none";
+
+          saveBtn.style.display = "inline-block";
+          cancelBtn.style.display = "inline-block";
+
+          // 使いやすさ：フォーカス
+          editInput.focus();
+          editInput.select();
         };
 
-        // 表示モードへ戻す（キャンセル）
+        // キャンセル（表示モードへ戻す）
         cancelBtn.onclick = () => {
           editInput.value = user.name;
 
-          editInput.style.display = "none";
+          nameSpan.style.display = "inline";
+          editWrap.style.display = "none";
+
+          editBtn.style.display = "inline-block";
+          deleteBtn.style.display = "inline-block";
+
           saveBtn.style.display = "none";
           cancelBtn.style.display = "none";
-
-          nameSpan.style.display = "inline";
-          editBtn.style.display = "inline";
         };
 
         // 保存（PUT /api/users/{id}）
         saveBtn.onclick = async () => {
-          const newName = editInput.value.trim();
-          if (!newName) {
-            alert("名前を入力してください");
+          const newName = editInput.value;
+
+          if (!isValidName(newName)) {
+            showMessage("名前を入力してください", "ng");
+            editInput.focus();
             return;
           }
 
           const res = await fetch(`/api/users/${user.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: newName })
+            body: JSON.stringify({ name: newName.trim() })
           });
 
           if (res.ok) {
-            message.textContent = "更新しました";
-            await loadUsers();
+            showMessage("更新しました", "ok");
+            await loadUsers(); // 再取得して最新反映
           } else {
-            message.textContent = `更新に失敗しました（HTTP ${res.status}）`;
+            showMessage(`更新に失敗しました（HTTP ${res.status}）`, "ng");
           }
         };
 
         // 削除（DELETE /api/users/{id}）
         deleteBtn.onclick = async () => {
-          if (!confirm("本当に削除しますか？")) return;
+          if (!confirm(`ID=${user.id} を削除しますか？`)) return;
 
           const res = await fetch(`/api/users/${user.id}`, { method: "DELETE" });
 
           if (res.ok) {
-            message.textContent = "削除しました";
+            showMessage("削除しました", "ok");
             await loadUsers();
           } else {
-            message.textContent = `削除に失敗しました（HTTP ${res.status}）`;
+            showMessage(`削除に失敗しました（HTTP ${res.status}）`, "ng");
           }
         };
 
-        li.appendChild(nameSpan);
-        li.appendChild(editInput);
-        li.appendChild(editBtn);
-        li.appendChild(saveBtn);
-        li.appendChild(cancelBtn);
-        li.appendChild(deleteBtn);
+        tdActions.appendChild(editBtn);
+        tdActions.appendChild(saveBtn);
+        tdActions.appendChild(cancelBtn);
+        tdActions.appendChild(deleteBtn);
 
-        userList.appendChild(li);
+        tr.appendChild(tdId);
+        tr.appendChild(tdName);
+        tr.appendChild(tdActions);
+
+        userTableBody.appendChild(tr);
       });
+
+      // フィルタ結果が0件のときの見栄え
+      if (filtered.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 3;
+        td.style.color = "#6b7280";
+        td.style.padding = "14px 12px";
+        td.textContent = keyword ? "検索条件に一致するユーザーがいません。" : "ユーザーがまだいません。";
+        tr.appendChild(td);
+        userTableBody.appendChild(tr);
+      }
     }
+
+    // 検索入力で即フィルタ
+    searchInput.addEventListener("input", renderUsers);
 
     // 登録（POST /api/users）
     form.addEventListener("submit", async (e) => {
@@ -152,7 +496,7 @@
 
       const name = nameInput.value.trim();
       if (!name) {
-        message.textContent = "名前を入力してください";
+        showMessage("名前を入力してください", "ng");
         return;
       }
 
@@ -163,18 +507,18 @@
       });
 
       if (res.ok) {
-        message.textContent = "登録しました";
+        showMessage("登録しました", "ok");
         nameInput.value = "";
+        setCreateButtonState();
         await loadUsers();
       } else {
-        message.textContent = `登録に失敗しました（HTTP ${res.status}）`;
+        showMessage(`登録に失敗しました（HTTP ${res.status}）`, "ng");
       }
     });
 
     // 初回読み込み
+    setCreateButtonState();
     loadUsers();
   </script>
-
 </body>
 </html>
-
